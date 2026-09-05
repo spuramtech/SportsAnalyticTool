@@ -11,6 +11,7 @@ HCA Performance Lab is a local, container-ready analyst UI for reviewing the ext
 - Data-quality and failed-source visibility
 - SQLite-backed API access to the existing analytical database
 - Local RBAC role simulation without authentication
+- Lazy section loading with visible request status
 
 The UI is decision support. It does not make automatic selection decisions and does not infer fitness, injury, opposition strength, venue effects, or causality from fields that are not present in the source data.
 
@@ -143,6 +144,10 @@ The first command should return summary counts, the second should return matchin
 - **Generate report only:** `npm run generate-report`
 
 The UI does not need the raw feed directories at runtime. It only needs the SQLite database. The raw directories are required when rebuilding or auditing source provenance.
+
+### Performance note
+
+The serving path uses Node.js with `better-sqlite3` and bounded API responses. The Player, Team, and Data Quality sections are lazy-loaded when opened, and the UI displays loading or error status during requests. A warm local sample of 20 requests to the bounded player endpoint completed with an observed median of approximately 50 ms on the development machine; this is an environment-specific smoke measurement, not a production SLA.
 
 ### 3.10 Stop the local server
 

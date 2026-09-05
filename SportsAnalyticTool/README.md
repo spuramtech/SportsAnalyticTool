@@ -53,3 +53,4 @@ Available roles: `viewer`, `analyst`, `coach`, `data_engineer`, and `admin`.
 - [RBAC design](docs/HCA_RBAC_DESIGN.md)
 - [Analytics architecture](docs/HCA_ANALYTICS_ARCHITECTURE.md)
 - [Solution architecture review](docs/HCA_SOLUTION_ARCHITECTURE_REVIEW.md)
+- [Low-latency architecture decision](docs/HCA_PERFORMANCE_ARCHITECTURE.md)

@@ -9,6 +9,275 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <style>
+    /* ── Player analytics dialog ── */
+    #player-dialog {
+      width: min(1120px, calc(100% - 24px));
+      max-height: 92vh;
+      overflow-y: auto;
+      padding: 32px 36px;
+      border-radius: 4px;
+    }
+    #player-dialog h2 { font-size: 26px; margin: 0 0 4px; letter-spacing: -.03em; }
+    .conf-warn {
+      background: #fff4e5; border-left: 3px solid var(--orange);
+      padding: 9px 14px; font: 10px var(--mono); color: #8a5020;
+      letter-spacing: .04em; margin-bottom: 16px; border-radius: 2px;
+    }
+    .p-meta { font: 11px var(--mono); color: var(--muted); margin-bottom: 20px; }
+    /* Tabs */
+    .p-tabs { display: flex; gap: 0; border-bottom: 1px solid var(--line); margin-bottom: 24px; }
+    .p-tab {
+      border: 0; background: transparent; padding: 10px 18px; font-size: 12px;
+      font-weight: 700; color: var(--muted); cursor: pointer;
+      border-bottom: 2px solid transparent; margin-bottom: -1px;
+      font-family: var(--mono); text-transform: uppercase; letter-spacing: .06em;
+    }
+    .p-tab.active { color: var(--green); border-bottom-color: var(--green); }
+    .p-tab:hover:not(.active) { color: var(--ink); }
+    /* Tab panels */
+    .p-panel { display: none; }
+    .p-panel.active { display: block; }
+    /* Career KPI row */
+    .c-kpis {
+      display: grid; grid-template-columns: repeat(8, 1fr);
+      gap: 8px; margin-bottom: 22px;
+    }
+    .c-kpi {
+      background: var(--paper); border: 1px solid var(--line);
+      padding: 12px 8px; text-align: center;
+    }
+    .c-kpi small {
+      display: block; font: 9px var(--mono); color: var(--muted);
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px;
+    }
+    .c-kpi strong { font-size: 19px; font-weight: 800; letter-spacing: -.04em; }
+    /* Tournament history list */
+    .t-history { display: grid; gap: 3px; }
+    .h-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 9px 12px; border: 1px solid var(--line); font-size: 12px;
+    }
+    .h-row:nth-child(even) { background: var(--paper); }
+    .h-left strong { display: block; font-size: 12px; }
+    .h-left span { font: 10px var(--mono); color: var(--muted); }
+    .h-right { display: flex; gap: 14px; font: 11px var(--mono); color: var(--muted); }
+    .h-right span { white-space: nowrap; }
+    /* Charts */
+    .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .chart-grid.bowling-grid { grid-template-columns: 1fr 1fr 1fr; }
+    .chart-box { border: 1px solid var(--line); padding: 14px 16px; background: var(--surface); }
+    .chart-box canvas { display: block; width: 100%; }
+    .chart-lbl {
+      font: 9px var(--mono); text-transform: uppercase; color: var(--muted);
+      letter-spacing: .08em; margin: 0 0 10px;
+    }
+    /* Stats tables (batting + bowling) */
+    .stats-table {
+      width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 0;
+    }
+    .stats-table th {
+      background: var(--paper); border: 1px solid var(--line);
+      padding: 8px 11px; text-align: left;
+      font: 9px var(--mono); text-transform: uppercase;
+      color: var(--muted); letter-spacing: .06em; white-space: nowrap;
+    }
+    .stats-table td {
+      border: 1px solid var(--line); padding: 9px 11px; white-space: nowrap; vertical-align: middle;
+    }
+    .stats-table td:not(:first-child), .stats-table th:not(:first-child) {
+      text-align: right; font-family: var(--mono);
+    }
+    .stats-table .td-name { font-weight: 700; }
+    .stats-table .td-sub { display: block; font: 10px var(--mono); color: var(--muted); margin-top: 2px; }
+    .stats-table tbody tr:nth-child(even) td { background: var(--paper); }
+    .stats-table tbody tr:hover td { background: #eef5ec; }
+    /* ── Compare feature ── */
+    .cmp-btn {
+      border: 1px solid var(--line); background: var(--surface);
+      width: 24px; height: 24px; border-radius: 3px; cursor: pointer;
+      font-size: 13px; font-weight: 800; color: var(--muted); line-height: 1;
+      display: inline-flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: border-color .12s, color .12s;
+    }
+    .cmp-btn:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+    .cmp-btn.cmp-active { background: var(--lime); border-color: var(--green); color: var(--green); }
+    .cmp-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    /* Compare selection banner */
+    #compare-banner {
+      display: flex; align-items: center; gap: 12px;
+      background: var(--ink); color: #c8ddd5;
+      padding: 10px 16px; margin-bottom: 14px; font-size: 12px;
+      border-radius: 3px;
+    }
+    #compare-banner[hidden] { display: none; }
+    #compare-banner-names { flex: 1; font-family: var(--mono); font-size: 11px; }
+    #compare-banner-names strong { color: var(--lime); font-weight: 700; }
+    .btn-cmp-go {
+      background: var(--lime); color: var(--green); border: 0;
+      padding: 7px 14px; font-weight: 800; font-size: 11px; cursor: pointer;
+      font-family: var(--mono); white-space: nowrap; border-radius: 2px;
+    }
+    .btn-cmp-go:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-cmp-clear {
+      background: transparent; color: #8bb2a2; border: 1px solid #315246;
+      padding: 6px 10px; font-size: 11px; cursor: pointer;
+      font-family: var(--mono); border-radius: 2px;
+    }
+    /* Compare dialog */
+    #compare-dialog {
+      width: min(1240px, calc(100% - 24px));
+      max-height: 92vh; overflow-y: auto;
+      padding: 32px 36px; border-radius: 4px;
+    }
+    #compare-dialog h2 { font-size: 15px; font-weight: 700; letter-spacing: -.01em; margin: 0 0 20px; }
+    .cmp-players {
+      display: grid; grid-template-columns: 1fr auto 1fr;
+      align-items: center; gap: 16px;
+      padding-bottom: 20px; margin-bottom: 24px;
+      border-bottom: 1px solid var(--line);
+    }
+    .cmp-player-card { padding: 14px 16px; border: 1px solid var(--line); }
+    .cmp-player-card.p1 { border-color: #0e4b3b; border-left: 3px solid var(--green); }
+    .cmp-player-card.p2 { border-color: #b55a00; border-left: 3px solid var(--orange); text-align: right; }
+    .cmp-player-card strong { display: block; font-size: 15px; letter-spacing: -.02em; }
+    .cmp-player-card small { font: 10px var(--mono); color: var(--muted); }
+    .cmp-vs { text-align: center; font: 700 16px var(--mono); color: var(--muted); }
+    /* Compare layout */
+    .cmp-body { display: grid; grid-template-columns: 5fr 4fr; gap: 24px; align-items: start; }
+    /* Head-to-head table */
+    .h2h-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .h2h-table th {
+      border: 1px solid var(--line); padding: 9px 11px;
+      font: 9px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted);
+      background: var(--paper); white-space: nowrap;
+    }
+    .h2h-table th.p1-head { color: var(--green); font-size: 11px; text-align: center; }
+    .h2h-table th.p2-head { color: #b55a00; font-size: 11px; text-align: center; }
+    .h2h-label {
+      border: 1px solid var(--line); padding: 8px 11px;
+      font: 10px var(--mono); text-transform: uppercase;
+      color: var(--muted); background: var(--paper); white-space: nowrap;
+    }
+    .h2h-val {
+      border: 1px solid var(--line); padding: 8px 11px;
+      text-align: center; font-family: var(--mono); font-size: 12px;
+    }
+    .h2h-val.h2h-win { font-weight: 800; background: #f0f9e8; }
+    .h2h-val.h2h-win.p1 { color: var(--green); }
+    .h2h-val.h2h-win.p2 { color: #b55a00; }
+    .h2h-section-row td {
+      border: 1px solid var(--line); padding: 5px 11px;
+      font: 9px var(--mono); text-transform: uppercase; letter-spacing: .08em;
+      background: var(--ink); color: #8bb2a2;
+    }
+    /* Compare charts panel */
+    .cmp-charts { display: grid; gap: 16px; }
+    .cmp-chart-box { border: 1px solid var(--line); padding: 14px 16px; background: var(--surface); }
+    .cmp-chart-box canvas { display: block; width: 100%; }
+    .cmp-chart-lbl {
+      font: 9px var(--mono); text-transform: uppercase; color: var(--muted);
+      letter-spacing: .08em; margin: 0 0 10px;
+    }
+    @media (max-width: 960px) {
+      .cmp-body { grid-template-columns: 1fr; }
+      .cmp-players { grid-template-columns: 1fr auto 1fr; }
+    }
+    /* Responsive */
+    @media (max-width: 900px) {
+      #player-dialog { padding: 22px 18px; }
+      .c-kpis { grid-template-columns: repeat(4, 1fr); }
+      .chart-grid, .chart-grid.bowling-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 560px) {
+      .c-kpis { grid-template-columns: repeat(2, 1fr); }
+      .h-right { display: none; }
+    }
+    /* ── Compare pool screen ── */
+    .cpool-filters { display: flex; flex-direction: column; gap: 12px; }
+    .cpool-row { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+    .cpool-group { display: flex; flex-direction: column; gap: 4px; }
+    .cpool-group.cpool-full { flex: 1 1 100%; }
+    .cpool-group.cpool-narrow { max-width: 100px; }
+    .cpool-group.cpool-grow { flex: 1; min-width: 180px; }
+    .cpool-lbl { font: 9px var(--mono); text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+    .cpool-lbl-note { font-size: 8px; text-transform: none; letter-spacing: 0; opacity: .7; }
+    .cpool-sel, .cpool-num, .cpool-srch {
+      border: 1px solid var(--line); background: var(--surface);
+      padding: 7px 10px; font: 12px var(--mono); color: var(--ink);
+      border-radius: 2px; height: 34px; box-sizing: border-box;
+    }
+    .cpool-sel { min-width: 130px; }
+    .cpool-num { width: 86px; }
+    .cpool-srch { width: 100%; }
+    .cpool-btn-sec {
+      border: 1px solid var(--line); background: transparent; color: var(--muted);
+      padding: 7px 13px; font: 12px var(--mono); cursor: pointer;
+      border-radius: 2px; height: 34px; white-space: nowrap;
+    }
+    .cpool-btn-sec:hover { border-color: var(--green); color: var(--ink); }
+    /* Year pills */
+    .cpool-pills { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cpool-pill {
+      border: 1px solid var(--line); background: var(--surface);
+      padding: 4px 12px; font: 11px var(--mono); color: var(--muted);
+      cursor: pointer; border-radius: 2px; transition: all .1s;
+    }
+    .cpool-pill:hover { border-color: var(--green); color: var(--green); }
+    .cpool-pill.cpool-pill-on { background: var(--lime); border-color: var(--green); color: var(--green); font-weight: 700; }
+    /* Selection bar */
+    .cpool-selbar {
+      position: sticky; top: 0; z-index: 20;
+      display: flex; align-items: center; gap: 12px;
+      background: var(--ink); color: #c8ddd5;
+      padding: 10px 18px; margin: 10px 0;
+      border-radius: 3px;
+    }
+    .cpool-selbar[hidden] { display: none; }
+    .cpool-chips { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+    .cpool-chip {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 4px 10px; border-radius: 3px; font: 700 11px var(--mono);
+      border: 1px solid transparent; white-space: nowrap;
+    }
+    .cpool-chip button {
+      background: none; border: none; cursor: pointer; font-size: 13px;
+      line-height: 1; padding: 0; color: inherit; opacity: .7;
+    }
+    .cpool-chip button:hover { opacity: 1; }
+    /* Role badges */
+    .role-badge {
+      display: inline-block; padding: 2px 7px;
+      font: 9px var(--mono); text-transform: uppercase; letter-spacing: .06em;
+      border-radius: 2px; white-space: nowrap;
+    }
+    .role-bat  { background: #e8f4e8; color: #1a5c1a; border: 1px solid #b8d8b8; }
+    .role-bowl { background: #fff3e8; color: #7a3a00; border: 1px solid #f0c898; }
+    .role-ar   { background: #e8f0ff; color: #1a2c7a; border: 1px solid #b8c8f8; }
+    /* Multi-player comparison layout */
+    .mcmp-player-chips { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 24px; }
+    .mcmp-pchip {
+      padding: 12px 16px; border: 1px solid var(--line);
+      border-radius: 3px; background: var(--surface); min-width: 140px;
+    }
+    .mcmp-pchip strong { display: block; font-size: 13px; letter-spacing: -.02em; }
+    .mcmp-pchip small { font: 10px var(--mono); color: var(--muted); }
+    .mcmp-layout { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; }
+    .mcmp-tbl-wrap { overflow-x: auto; }
+    .mcmp-table { border-collapse: collapse; font-size: 12px; }
+    .mcmp-metric-head { background: var(--paper); border: 1px solid var(--line); padding: 9px 14px; font: 9px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); white-space: nowrap; min-width: 140px; }
+    .mcmp-player-head { border: 1px solid var(--line); padding: 10px 16px; text-align: center; background: var(--paper); min-width: 110px; }
+    .mcmp-player-head strong { display: block; font-size: 13px; letter-spacing: -.02em; }
+    .mcmp-player-head small { font: 10px var(--mono); color: var(--muted); }
+    .mcmp-metric { border: 1px solid var(--line); padding: 8px 14px; font: 10px var(--mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); background: var(--paper); white-space: nowrap; }
+    .mcmp-val { border: 1px solid var(--line); padding: 8px 14px; text-align: center; font-family: var(--mono); font-size: 12px; }
+    .mcmp-best { font-weight: 800; background: #f0f9e8; }
+    .mcmp-section-hdr td { border: 1px solid var(--line); padding: 5px 14px; font: 9px var(--mono); text-transform: uppercase; letter-spacing: .08em; background: var(--ink); color: #8bb2a2; }
+    .mcmp-charts { display: flex; flex-direction: column; gap: 16px; }
+    .mcmp-chart-box { border: 1px solid var(--line); padding: 14px 16px; background: var(--surface); }
+    .mcmp-chart-box canvas { display: block; width: 100%; }
+    @media (max-width: 1100px) { .mcmp-layout { grid-template-columns: 1fr; } }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -16,11 +285,12 @@
       <div class="brand"><span class="brand-mark">H</span><div><strong>HCA</strong><small>PERFORMANCE LAB</small></div></div>
       <div class="sidebar-rule"></div>
       <p class="eyebrow">Workspace</p>
-      <nav class="nav"><button class="nav-item active" data-section="overview"><span>01</span> Overview</button><button class="nav-item" data-section="players"><span>02</span> Player pool</button><button class="nav-item" data-section="teams"><span>03</span> Team performance</button><button class="nav-item" data-section="quality"><span>04</span> Data quality</button></nav>
+      <nav class="nav"><button class="nav-item active" data-section="overview"><span>01</span> Overview</button><button class="nav-item" data-section="players"><span>02</span> Player pool</button><button class="nav-item" data-section="teams"><span>03</span> Team performance</button><button class="nav-item" data-section="quality"><span>04</span> Data quality</button><button class="nav-item" data-section="compare"><span>05</span> Compare players</button></nav>
       <div class="sidebar-foot"><span class="status-dot"></span><span>Source sync available</span><small>2024 — 2026</small></div>
     </aside>
     <main class="main-content">
       <header class="topbar"><div><p class="eyebrow">Analyst workspace / HCA</p><h1 id="page-title">Performance overview</h1></div><div class="topbar-meta"><label class="role-switcher">Local role<select id="role-filter"></select></label><span class="live-dot"></span><span id="last-updated">Authentication disabled · local RBAC simulation</span></div></header>
+      <div id="loading-status" class="loading-status" role="status" aria-live="polite">Ready</div>
       <section class="filters" aria-label="Analysis filters"><label>Season<select id="year-filter"><option value="all">All seasons</option></select></label><label>Tournament<select id="tournament-filter"><option value="all">All tournaments</option></select></label><label class="search-field">Find player or team<input id="search-filter" type="search" placeholder="Search names"></label><button id="apply-filter" class="button button-dark">Apply filters</button></section>
       <section id="overview-section" class="content-section active-section">
         <div class="section-intro"><div><p class="eyebrow accent">Decision support</p><h2>See the shape of performance.</h2><p class="lede">A clean view of output, opportunity, and evidence quality across the HCA competition set.</p></div><div class="evidence-note"><span class="note-mark">i</span><p><strong>Evidence first.</strong><br>High confidence requires a meaningful match and opportunity sample.</p></div></div>
@@ -28,12 +298,107 @@
         <div class="grid-two"><article class="panel"><div class="panel-heading"><div><p class="eyebrow">Leaders</p><h3>Batting output</h3></div><button class="text-button" data-jump="players">View pool →</button></div><div id="batting-preview"></div></article><article class="panel dark-panel"><div class="panel-heading"><div><p class="eyebrow">Leaders</p><h3>Team efficiency</h3></div><button class="text-button light" data-jump="teams">View teams →</button></div><div id="team-preview"></div></article></div>
         <article class="panel insight-panel"><div><p class="eyebrow accent">Analyst guardrails</p><h3>What this data can and cannot say</h3></div><div class="guardrail-grid"><div><span class="guardrail-icon yes">+</span><p><strong>Can show</strong><br>Repeatable output, opportunity-adjusted rates, team results, and multi-season signals.</p></div><div><span class="guardrail-icon no">—</span><p><strong>Needs context</strong><br>Fitness, workload, opposition strength, venue, phase of play, and video evidence.</p></div></div></article>
       </section>
-      <section id="players-section" class="content-section"><div class="section-intro compact"><div><p class="eyebrow accent">Player pool</p><h2>Find the next impact player.</h2><p class="lede">Totals are paired with opportunity and an explicit evidence tier.</p></div></div><article class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Top 100 records</p><h3>Player performance</h3></div><span class="table-note">Select a row for season detail</span></div><div class="table-wrap"><table><thead><tr><th>Player</th><th>Team</th><th>Matches</th><th>Runs</th><th>SR</th><th>Wkts</th><th>Economy</th><th>Evidence</th></tr></thead><tbody id="players-table"></tbody></table></div></article></section>
+      <section id="players-section" class="content-section"><div class="section-intro compact"><div><p class="eyebrow accent">Player pool</p><h2>Find the next impact player.</h2><p class="lede">Totals are paired with opportunity and an explicit evidence tier.</p></div></div><div id="compare-banner" hidden><span id="compare-banner-names">Select a player to start comparing</span><button class="btn-cmp-go" id="btn-cmp-go" disabled>Compare →</button><button class="btn-cmp-clear" id="btn-cmp-clear">Clear ×</button></div><article class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Top 100 records</p><h3>Player performance</h3></div><span class="table-note">Select a row for season detail · use + to compare</span></div><div class="table-wrap"><table><thead><tr><th>Player</th><th>Team</th><th>Matches</th><th>Innings</th><th>Runs</th><th>SR</th><th>Wkts</th><th>Economy</th><th>Evidence</th><th>Vs</th></tr></thead><tbody id="players-table"></tbody></table></div></article></section>
       <section id="teams-section" class="content-section"><div class="section-intro compact"><div><p class="eyebrow accent">Team performance</p><h2>Compare the competitive system.</h2><p class="lede">Win rate is shown alongside run ratio and points to avoid single-metric decisions.</p></div></div><article class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Team index</p><h3>Results and efficiency</h3></div></div><div class="table-wrap"><table><thead><tr><th>Team</th><th>Matches</th><th>Wins</th><th>Losses</th><th>Win rate</th><th>Points</th><th>Run ratio</th></tr></thead><tbody id="teams-table"></tbody></table></div></article></section>
       <section id="quality-section" class="content-section"><div class="section-intro compact"><div><p class="eyebrow accent">Trust layer</p><h2>Know the limits of the evidence.</h2><p class="lede">Source failures remain visible so an analyst never mistakes missing data for zero performance.</p></div></div><div id="quality-checks" class="quality-grid"></div><article class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Endpoint audit</p><h3>Failed or unavailable feeds</h3></div></div><div class="table-wrap"><table><thead><tr><th>Source URL</th><th>Reason</th></tr></thead><tbody id="failures-table"></tbody></table></div></article></section>
+      <section id="compare-section" class="content-section">
+        <div class="section-intro compact"><div><p class="eyebrow accent">Multi-player analysis</p><h2>Compare players side by side.</h2><p class="lede">Filter by year, team, role, and batting or bowling style. Select up to 6 players, then run a full statistical comparison with charts. Note: age data is not available in the current dataset.</p></div></div>
+        <article class="panel">
+          <div class="panel-heading"><div><p class="eyebrow">Filter controls</p><h3>Build your player pool</h3></div></div>
+          <div class="cpool-filters">
+            <div class="cpool-row">
+              <div class="cpool-group cpool-full">
+                <label class="cpool-lbl">Season Year <span style="font-weight:400;color:var(--muted)">(select multiple)</span></label>
+                <div id="cpool-years" class="cpool-pills"></div>
+              </div>
+            </div>
+            <div class="cpool-row">
+              <div class="cpool-group">
+                <label class="cpool-lbl">Tournament</label>
+                <select id="cpool-tournament" class="cpool-sel"><option value="all">All Tournaments</option></select>
+              </div>
+              <div class="cpool-group">
+                <label class="cpool-lbl">Team</label>
+                <select id="cpool-team" class="cpool-sel"><option value="all">All Teams</option></select>
+              </div>
+              <div class="cpool-group">
+                <label class="cpool-lbl">Player Role</label>
+                <select id="cpool-role" class="cpool-sel">
+                  <option value="all">All Roles</option>
+                  <option value="batter">Batter</option>
+                  <option value="bowler">Bowler</option>
+                  <option value="allrounder">All-Rounder</option>
+                </select>
+              </div>
+              <div class="cpool-group">
+                <label class="cpool-lbl">Batsman Type <span class="cpool-lbl-note">(batting hand)</span></label>
+                <select id="cpool-bat-hand" class="cpool-sel">
+                  <option value="all">All Batsmen</option>
+                  <option value="right">Right Hand Batsman</option>
+                  <option value="left">Left Hand Batsman</option>
+                </select>
+              </div>
+              <div class="cpool-group">
+                <label class="cpool-lbl">Bowler Type <span class="cpool-lbl-note">(style)</span></label>
+                <select id="cpool-bowl-type" class="cpool-sel">
+                  <option value="">All Bowler Types</option>
+                </select>
+              </div>
+              <div class="cpool-group cpool-narrow">
+                <label class="cpool-lbl">Min Matches</label>
+                <input id="cpool-min-matches" type="number" min="0" value="1" class="cpool-num">
+              </div>
+              <div class="cpool-group cpool-narrow">
+                <label class="cpool-lbl">Min Runs</label>
+                <input id="cpool-min-runs" type="number" min="0" value="0" class="cpool-num">
+              </div>
+            </div>
+            <div class="cpool-row">
+              <div class="cpool-group cpool-grow">
+                <label class="cpool-lbl">Search Player / Team</label>
+                <input id="cpool-search" type="search" placeholder="Type to search…" class="cpool-srch">
+              </div>
+              <button id="cpool-apply" class="button button-dark">Apply Filters</button>
+              <button id="cpool-reset" class="cpool-btn-sec">Reset</button>
+            </div>
+          </div>
+        </article>
+        <div id="cpool-selbar" class="cpool-selbar" hidden>
+          <div id="cpool-chips" class="cpool-chips"></div>
+          <button id="cpool-run-cmp" class="btn-cmp-go" disabled>Compare selected →</button>
+          <button id="cpool-clear-sel" class="btn-cmp-clear">Clear ×</button>
+        </div>
+        <article class="panel table-panel">
+          <div class="panel-heading">
+            <div><p class="eyebrow" id="cpool-count">Player pool</p><h3>Select players to compare</h3></div>
+            <span class="table-note">Use + to add a player · select 2 – 6 players then Compare</span>
+          </div>
+          <div class="table-wrap">
+            <table class="stats-table">
+              <thead><tr>
+                <th>Player</th><th>Team</th><th>Role</th><th>Bat</th><th>Bowl</th>
+                <th>M</th><th>Inns</th><th>Runs</th><th>Avg</th><th>SR</th><th>HS</th><th>50s</th><th>100s</th>
+                <th>Wkts</th><th>Eco</th><th></th>
+              </tr></thead>
+              <tbody id="cpool-table"></tbody>
+            </table>
+          </div>
+        </article>
+        <div id="cpool-results" hidden>
+          <article class="panel">
+            <div class="panel-heading">
+              <div><p class="eyebrow accent">Comparison results</p><h3 id="cpool-results-title">Player Comparison</h3></div>
+              <button id="cpool-results-close" class="cpool-btn-sec">← Back to pool</button>
+            </div>
+            <div id="cpool-results-inner"></div>
+          </article>
+        </div>
+      </section>
     </main>
   </div>
+  <dialog id="compare-dialog"><button class="dialog-close" id="compare-close" aria-label="Close">×</button><p class="eyebrow accent">Head-to-head comparison</p><div id="compare-content"></div></dialog>
   <dialog id="player-dialog"><button class="dialog-close" aria-label="Close">×</button><p class="eyebrow accent">Player detail</p><h2 id="dialog-player-name">Player</h2><div id="player-detail"></div></dialog>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>
