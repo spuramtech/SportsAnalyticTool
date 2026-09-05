@@ -1,0 +1,14 @@
+{
+  "name": "hca-analytics",
+  "private": true,
+  "scripts": {
+    "build-database": "node src/build_hca_database.js",
+    "generate-report": "node src/generate_analyst_report.js",
+    "extract-leaderboards": "node src/extract_hca_leaderboard.js",
+    "start": "node src/server.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1"
+  }
+}

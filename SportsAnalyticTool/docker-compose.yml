@@ -1,0 +1,12 @@
+services:
+  hca-analytics:
+    build: .
+    image: hca-analytics:local
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DATABASE_PATH: /app/data/hca_analytics.sqlite
+    volumes:
+      - ./data/hca_analytics.sqlite:/app/data/hca_analytics.sqlite:ro
+    restart: unless-stopped

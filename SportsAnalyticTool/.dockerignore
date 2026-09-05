@@ -1,0 +1,6 @@
+node_modules
+.git
+*.md
+data/leaderboards
+data/hca_database_raw
+npm-debug.log

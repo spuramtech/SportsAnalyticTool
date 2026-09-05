@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10251e">
+  <title>HCA Performance Lab</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">H</span><div><strong>HCA</strong><small>PERFORMANCE LAB</small></div></div>
+      <div class="sidebar-rule"></div>
+      <p class="eyebrow">Workspace</p>
+      <nav class="nav"><button class="nav-item active" data-section="overview"><span>01</span> Overview</button><button class="nav-item" data-section="players"><span>02</span> Player pool</button><button class="nav-item" data-section="teams"><span>03</span> Team performance</button><button class="nav-item" data-section="quality"><span>04</span> Data quality</button></nav>
+      <div class="sidebar-foot"><span class="status-dot"></span><span>Source sync available</span><small>2024 — 2026</small></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar"><div><p class="eyebrow">Analyst workspace / HCA</p><h1 id="page-title">Performance overview</h1></div><div class="topbar-meta"><label class="role-switcher">Local role<select id="role-filter"></select></label><span class="live-dot"></span><span id="last-updated">Authentication disabled · local RBAC simulation</span></div></header>
+      <section class="filters" aria-label="Analysis filters"><label>Season<select id="year-filter"><option value="all">All seasons</option></select></label><label>Tournament<select id="tournament-filter"><option value="all">All tournaments</option></select></label><label class="search-field">Find player or team<input id="search-filter" type="search" placeholder="Search names"></label><button id="apply-filter" class="button button-dark">Apply filters</button></section>
+      <section id="overview-section" class="content-section active-section">
+        <div class="section-intro"><div><p class="eyebrow accent">Decision support</p><h2>See the shape of performance.</h2><p class="lede">A clean view of output, opportunity, and evidence quality across the HCA competition set.</p></div><div class="evidence-note"><span class="note-mark">i</span><p><strong>Evidence first.</strong><br>High confidence requires a meaningful match and opportunity sample.</p></div></div>
+        <div id="kpis" class="kpi-grid"></div>
+        <div class="grid-two"><article class="panel"><div class="panel-heading"><div><p class="eyebrow">Leaders</p><h3>Batting output</h3></div><button class="text-button" data-jump="players">View pool →</button></div><div id="batting-preview"></div></article><article class="panel dark-panel"><div class="panel-heading"><div><p class="eyebrow">Leaders</p><h3>Team efficiency</h3></div><button class="text-button light" data-jump="teams">View teams →</button></div><div id="team-preview"></div></article></div>
+        <article class="panel insight-panel"><div><p class="eyebrow accent">Analyst guardrails</p><h3>What this data can and cannot say</h3></div><div class="guardrail-grid"><div><span class="guardrail-icon yes">+</span><p><strong>Can show</strong><br>Repeatable output, opportunity-adjusted rates, team results, and multi-season signals.</p></div><div><span class="guardrail-icon no">—</span><p><strong>Needs context</strong><br>Fitness, workload, opposition strength, venue, phase of play, and video evidence.</p></div></div></article>
+      </section>
+      <section id="players-section" class="content-section"><div class="section-intro compact"><div><p class="eyebrow accent">Player pool</p><h2>Find the next impact player.</h2><p class="lede">Totals are paired with opportunity and an explicit evidence tier.</p></div></div><article class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Top 100 records</p><h3>Player performance</h3></div><span class="table-note">Select a row for season detail</span></div><div class="table-wrap"><table><thead><tr><th>Player</th><th>Team</th><th>Matches</th><th>Runs</th><th>SR</th><th>Wkts</th><th>Economy</th><th>Evidence</th></tr></thead><tbody id="players-table"></tbody></table></div></article></section>
+      <section id="teams-section" class="content-section"><div class="section-intro compact"><div><p class="eyebrow accent">Team performance</p><h2>Compare the competitive system.</h2><p class="lede">Win rate is shown alongside run ratio and points to avoid single-metric decisions.</p></div></div><article class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Team index</p><h3>Results and efficiency</h3></div></div><div class="table-wrap"><table><thead><tr><th>Team</th><th>Matches</th><th>Wins</th><th>Losses</th><th>Win rate</th><th>Points</th><th>Run ratio</th></tr></thead><tbody id="teams-table"></tbody></table></div></article></section>
+      <section id="quality-section" class="content-section"><div class="section-intro compact"><div><p class="eyebrow accent">Trust layer</p><h2>Know the limits of the evidence.</h2><p class="lede">Source failures remain visible so an analyst never mistakes missing data for zero performance.</p></div></div><div id="quality-checks" class="quality-grid"></div><article class="panel table-panel"><div class="panel-heading"><div><p class="eyebrow">Endpoint audit</p><h3>Failed or unavailable feeds</h3></div></div><div class="table-wrap"><table><thead><tr><th>Source URL</th><th>Reason</th></tr></thead><tbody id="failures-table"></tbody></table></div></article></section>
+    </main>
+  </div>
+  <dialog id="player-dialog"><button class="dialog-close" aria-label="Close">×</button><p class="eyebrow accent">Player detail</p><h2 id="dialog-player-name">Player</h2><div id="player-detail"></div></dialog>
+  <script src="/app.js"></script>
+</body>
+</html>
