@@ -436,10 +436,51 @@ function renderCmpCharts(c1, c2, n1, n2, hasBowling) {
 
 const CPOOL_COLORS = ['#0e4b3b', '#e07020', '#2d9e91', '#7357c8', '#1a6fa8', '#df755f'];
 
+const CPOOL_SORT_COLS = [
+  { key: 'player_name',   label: 'Player' },
+  { key: 'team_name',     label: 'Team' },
+  { key: 'role',          label: 'Role' },
+  { key: 'batting_type',  label: 'Bat' },
+  { key: 'bowling_type',  label: 'Bowl' },
+  { key: 'matches',       label: 'M' },
+  { key: 'innings',       label: 'Inns' },
+  { key: 'runs',          label: 'Runs' },
+  { key: 'batting_avg',   label: 'Avg' },
+  { key: 'strike_rate',   label: 'SR' },
+  { key: 'highest_score', label: 'HS' },
+  { key: 'fifties',       label: '50s' },
+  { key: 'hundreds',      label: '100s' },
+  { key: 'wickets',       label: 'Wkts' },
+  { key: 'economy',       label: 'Eco' },
+];
+
+function cpoolSortVal(row, col) {
+  switch (col) {
+    case 'player_name':   return (row.player_name || '').toLowerCase();
+    case 'team_name':     return (row.team_name || '').toLowerCase();
+    case 'role':          return getPlayerRole(row);
+    case 'batting_type':  return (row.batting_type || '').toLowerCase();
+    case 'bowling_type':  return (row.bowling_type || '').toLowerCase();
+    case 'matches':       return row.matches || 0;
+    case 'innings':       return row.innings || 0;
+    case 'runs':          return row.runs || 0;
+    case 'batting_avg':   return parseFloat(row.batting_avg) || 0;
+    case 'strike_rate':   return parseFloat(row.strike_rate) || 0;
+    case 'highest_score': return parseInt(row.highest_score) || 0;
+    case 'fifties':       return row.fifties || 0;
+    case 'hundreds':      return row.hundreds || 0;
+    case 'wickets':       return row.wickets || 0;
+    case 'economy':       return parseFloat(row.economy) || 0;
+    default:              return 0;
+  }
+}
+
 const cpoolState = {
   opts: null,
   pool: [],
   selected: [],   // { id, name, team }
+  sort: { col: 'runs', dir: 'desc' },
+  colFilters: {},
 };
 
 const mcmpCharts = [];
@@ -562,14 +603,73 @@ async function loadComparePool() {
 }
 
 function renderCpoolTable(rows, total = rows.length, capped = false) {
-  const shown = rows.length;
+  // Save focus so filter inputs don't lose cursor on re-render
+  const focusedFcol = document.activeElement?.dataset?.fcol;
+  const focusedPos  = document.activeElement?.selectionStart;
+
+  // Apply column filters (client-side, on top of API-level filters)
+  let filtered = rows;
+  const TEXT_COLS = new Set(['player_name', 'team_name', 'batting_type', 'bowling_type', 'role']);
+  for (const [col, val] of Object.entries(cpoolState.colFilters)) {
+    if (val === '' || val == null) continue;
+    if (TEXT_COLS.has(col)) {
+      const lc = String(val).toLowerCase();
+      filtered = filtered.filter(r => String(cpoolSortVal(r, col)).includes(lc));
+    } else {
+      const numVal = parseFloat(val);
+      if (isNaN(numVal)) continue;
+      if (col === 'economy') {
+        filtered = filtered.filter(r => { const v = cpoolSortVal(r, col); return v > 0 && v <= numVal; });
+      } else {
+        filtered = filtered.filter(r => cpoolSortVal(r, col) >= numVal);
+      }
+    }
+  }
+
+  // Sort
+  const { col: sortCol, dir } = cpoolState.sort;
+  const sorted = [...filtered].sort((a, b) => {
+    const va = cpoolSortVal(a, sortCol), vb = cpoolSortVal(b, sortCol);
+    if (va < vb) return dir === 'asc' ? -1 : 1;
+    if (va > vb) return dir === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  // Count display
+  const shown = sorted.length;
   const countEl = $('#cpool-count');
   if (capped) {
     countEl.innerHTML = `${total.toLocaleString()} players in pool &mdash; showing top ${shown.toLocaleString()} by runs &nbsp;<span style="color:var(--orange);font-weight:700">&#9888; Use search to find specific players</span>`;
   } else {
     countEl.textContent = `${shown.toLocaleString()} player${shown !== 1 ? 's' : ''} in pool`;
   }
-  $('#cpool-table').innerHTML = rows.map(row => {
+
+  // Render thead: sort row + filter row
+  const thead = document.querySelector('#cpool-stats-table thead');
+  if (thead) {
+    const fv = col => cpoolState.colFilters[col] ?? '';
+    const fltInputs = {
+      player_name:   `<input class="grid-flt"   data-fcol="player_name"  placeholder="Player…" value="${fv('player_name')}">`,
+      team_name:     `<input class="grid-flt"   data-fcol="team_name"    placeholder="Team…"   value="${fv('team_name')}">`,
+      runs:          `<input class="grid-flt grid-flt-n" data-fcol="runs"         placeholder="≥" value="${fv('runs')}">`,
+      batting_avg:   `<input class="grid-flt grid-flt-n" data-fcol="batting_avg"  placeholder="≥" value="${fv('batting_avg')}">`,
+      strike_rate:   `<input class="grid-flt grid-flt-n" data-fcol="strike_rate"  placeholder="≥" value="${fv('strike_rate')}">`,
+      wickets:       `<input class="grid-flt grid-flt-n" data-fcol="wickets"      placeholder="≥" value="${fv('wickets')}">`,
+      economy:       `<input class="grid-flt grid-flt-n" data-fcol="economy"      placeholder="≤" value="${fv('economy')}">`,
+    };
+    const sortRow = CPOOL_SORT_COLS.map(c => {
+      const active = c.key === sortCol;
+      const arrow  = active ? (dir === 'asc' ? ' ▲' : ' ▼') : ' ⇅';
+      return `<th data-sort="${c.key}" class="${active ? 'th-sort-active' : ''}">${c.label}<span class="sort-arrow">${arrow}</span></th>`;
+    }).join('') + '<th></th>';
+    const fltRow = CPOOL_SORT_COLS.map(c =>
+      `<th class="th-flt">${fltInputs[c.key] || ''}</th>`
+    ).join('') + '<th class="th-flt"></th>';
+    thead.innerHTML = `<tr class="thead-sort">${sortRow}</tr><tr class="thead-flt">${fltRow}</tr>`;
+  }
+
+  // Render tbody
+  $('#cpool-table').innerHTML = sorted.map(row => {
     const id = String(row.player_id);
     const sel = cpoolState.selected.some(p => p.id === id);
     const dis = !sel && cpoolState.selected.length >= 6 ? ' disabled' : '';
@@ -597,6 +697,15 @@ function renderCpoolTable(rows, total = rows.length, capped = false) {
       <td><button class="cmp-btn${sel ? ' cmp-active' : ''}" data-cpool-cmp="${id}" title="${sel ? 'Remove' : 'Add to compare'}"${dis}>${sel ? '✓' : '+'}</button></td>
     </tr>`;
   }).join('') || '<tr><td colspan="16" style="text-align:center;padding:20px;color:var(--muted)">No players match the current filters.</td></tr>';
+
+  // Restore focus to whichever filter input was active before re-render
+  if (focusedFcol) {
+    const inp = document.querySelector(`.grid-flt[data-fcol="${focusedFcol}"]`);
+    if (inp) {
+      inp.focus();
+      try { inp.setSelectionRange(focusedPos, focusedPos); } catch {}
+    }
+  }
 }
 
 function cpoolToggle(id) {
@@ -1297,6 +1406,8 @@ $('#cpool-reset').addEventListener('click', () => {
   $('#cpool-min-matches').value = '1';
   $('#cpool-min-runs').value = '0';
   $('#cpool-search').value = '';
+  cpoolState.colFilters = {};
+  cpoolState.sort = { col: 'runs', dir: 'desc' };
   loadComparePool();
 });
 $('#cpool-run-cmp').addEventListener('click', () => runComparison());
@@ -1310,6 +1421,26 @@ $('#cpool-clear-sel').addEventListener('click', () => {
 $('#cpool-results-close').addEventListener('click', () => {
   destroyMcmpCharts();
   $('#cpool-results').hidden = true;
+});
+
+// ── Player pool grid: column sort + inline column filters ─────────────────────
+document.getElementById('cpool-stats-table').addEventListener('click', e => {
+  if (e.target.closest('.grid-flt')) return;
+  const th = e.target.closest('th[data-sort]');
+  if (!th) return;
+  const c = th.dataset.sort;
+  cpoolState.sort = cpoolState.sort.col === c
+    ? { col: c, dir: cpoolState.sort.dir === 'asc' ? 'desc' : 'asc' }
+    : { col: c, dir: 'desc' };
+  renderCpoolTable(cpoolState.pool);
+});
+
+document.getElementById('cpool-stats-table').addEventListener('input', e => {
+  const inp = e.target.closest('.grid-flt');
+  if (!inp) return;
+  const val = inp.value.trim();
+  val === '' ? delete cpoolState.colFilters[inp.dataset.fcol] : (cpoolState.colFilters[inp.dataset.fcol] = val);
+  renderCpoolTable(cpoolState.pool);
 });
 
 init().catch(error => { document.body.innerHTML = `<main style="padding:40px;font-family:system-ui"><h1>Analytics unavailable</h1><p>${error.message}</p></main>`; });

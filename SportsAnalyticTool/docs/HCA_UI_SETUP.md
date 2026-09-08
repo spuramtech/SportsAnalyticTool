@@ -37,7 +37,7 @@ This is the simplest way to run the application on Windows. Docker is not requir
 In PowerShell, move to the folder containing `package.json`:
 
 ```powershell
-cd "D:\Personal\R&D"
+cd "D:\Personal\R&D\SportsAnalyticTool"
 ```
 
 You should see these important files:

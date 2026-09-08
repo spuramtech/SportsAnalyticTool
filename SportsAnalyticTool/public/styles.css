@@ -2,4 +2,14 @@
 .loading-status{min-height:22px;margin:-22px 0 24px;color:var(--muted);font:10px var(--mono);letter-spacing:.04em}.loading-status[data-state="loading"]{color:var(--green)}.loading-status[data-state="loading"]::before{content:' ';display:inline-block;width:7px;height:7px;margin-right:7px;border:1px solid var(--green);border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.topbar-meta{font:11px var(--mono);color:var(--muted);display:flex;align-items:center;gap:8px}.role-switcher{display:flex;align-items:center;gap:7px;text-transform:uppercase;font-size:9px}.role-switcher select{border:1px solid var(--line);background:var(--surface);padding:6px;color:var(--ink);font:10px var(--mono)}.filters{
 +@media(max-width:900px){.app-shell{grid-template-columns:1fr}.sidebar{padding:16px 18px;display:block}.sidebar-rule,.sidebar-foot,.sidebar .eyebrow{display:none}.brand{margin-bottom:14px}.nav{display:flex;overflow:auto}.nav-item{white-space:nowrap}.main-content{padding:26px 18px 48px}.kpi-grid{grid-template-columns:repeat(2,1fr)}.grid-two,.insight-panel{grid-template-columns:1fr}.quality-grid{grid-template-columns:repeat(2,1fr)}.filters{flex-wrap:wrap}.filters label{min-width:150px}.section-intro{display:block}.evidence-note{margin-top:20px}.section-intro h2{font-size:28px}}
 +@media(max-width:560px){.topbar{display:block}.topbar-meta{margin-top:14px}.filters{display:grid;grid-template-columns:1fr 1fr}.filters .search-field{grid-column:1/-1}.filters .button{grid-column:1/-1}.kpi-grid,.quality-grid{grid-template-columns:1fr 1fr}.panel{padding:16px}.guardrail-grid{grid-template-columns:1fr}.detail-grid{grid-template-columns:1fr 1fr}}
++/* ── Player pool: sortable columns + inline column filters ── */
++.thead-sort th[data-sort]{cursor:pointer;user-select:none;white-space:nowrap}
++.thead-sort th[data-sort]:hover{color:var(--ink)}
++.thead-sort th.th-sort-active{color:var(--green)}
++.sort-arrow{font-style:normal;opacity:.45;margin-left:3px;font-size:9px}
++.thead-sort th.th-sort-active .sort-arrow{opacity:1;color:var(--green)}
++.thead-flt th{padding:3px 6px;border-bottom:2px solid var(--line)}
++.grid-flt{width:100%;border:1px solid var(--line);background:var(--surface);padding:3px 5px;font:10px var(--mono);color:var(--ink);border-radius:2px;box-sizing:border-box;display:block;min-width:36px}
++.grid-flt-n{width:52px}
++.grid-flt:focus{border-color:var(--green);outline:none}
 +
