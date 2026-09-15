@@ -66,7 +66,7 @@ function renderPlayers(rows) {
     const isSel = compare.selected.some(p => p.id === id);
     const dis = !isSel && compare.selected.length >= 2 ? ' disabled' : '';
     return `<tr data-player="${id}">
-      <td><div class="player-name">${row.player_name || 'Unknown'}</div><div class="sub-cell">${id || 'No ID'}</div></td>
+      <td><div class="player-name">${row.player_name || 'Unknown'}${row.feed_gap ? ' <span style="color:var(--orange)" title="Some tournament feeds failed — data for this player may be incomplete">⚠</span>' : ''}</div><div class="sub-cell">${id || 'No ID'}</div></td>
       <td>${row.team_name || '—'}</td>
       <td>${number(row.matches)}</td>
       <td>${number(row.innings)}</td>
@@ -574,6 +574,12 @@ async function loadComparePool() {
   if (mr > 0) params.set('minRuns', mr);
   const srch = $('#cpool-search')?.value?.trim();
   if (srch) params.set('search', srch);
+  const role = $('#cpool-role')?.value;
+  if (role && role !== 'all') params.set('role', role);
+  const batHand = $('#cpool-bat-hand')?.value;
+  if (batHand && batHand !== 'all') params.set('batHand', batHand);
+  const bowlType = $('#cpool-bowl-type')?.value;
+  if (bowlType) params.set('bowlType', bowlType);
 
   let poolData;
   try {
@@ -582,21 +588,9 @@ async function loadComparePool() {
     setLoading(`Pool error: ${err.message}`);
     return;
   }
-  let rows = poolData.rows;
+  const rows = poolData.rows;
   const poolTotal = poolData.total;
   const poolCapped = poolData.capped;
-
-  // Client-side filters
-  const role      = $('#cpool-role')?.value;
-  const batHand   = $('#cpool-bat-hand')?.value;
-  const bowlType  = $('#cpool-bowl-type')?.value;
-
-  if (role === 'batter')     rows = rows.filter(r => getPlayerRole(r) === 'Batter');
-  if (role === 'bowler')     rows = rows.filter(r => getPlayerRole(r) === 'Bowler');
-  if (role === 'allrounder') rows = rows.filter(r => getPlayerRole(r) === 'All-Rounder');
-  if (batHand === 'right')   rows = rows.filter(r => /right/i.test(r.batting_type || ''));
-  if (batHand === 'left')    rows = rows.filter(r => /left/i.test(r.batting_type || ''));
-  if (bowlType)              rows = rows.filter(r => (r.bowling_type || '').trim() === bowlType);
 
   cpoolState.pool = rows;
   renderCpoolTable(rows, poolTotal, poolCapped);
@@ -679,7 +673,7 @@ function renderCpoolTable(rows, total = rows.length, capped = false) {
     const batShort  = (row.batting_type || '').replace('Hand Bat', '').trim() || '—';
     const bowlShort = (row.bowling_type || '').replace('Arm ', '').trim().slice(0, 14) || '—';
     return `<tr>
-      <td class="td-name">${row.player_name || 'Unknown'}<span class="td-sub">${id}</span></td>
+      <td class="td-name">${row.player_name || 'Unknown'}${row.feed_gap ? ' <span style="color:var(--orange)" title="Some tournament feeds failed — data may be incomplete">⚠</span>' : ''}<span class="td-sub">${id}</span></td>
       <td>${row.team_name || '—'}</td>
       <td><span class="role-badge ${roleClass}">${roleLbl}</span></td>
       <td style="font:10px var(--mono);color:var(--muted);white-space:nowrap">${batShort}</td>
@@ -1373,14 +1367,10 @@ $('#role-filter').addEventListener('change', async event => {
   state.loaded.clear();
   await loadOverview();
 });
-$('#player-dialog .dialog-close').addEventListener('click', () => {
-  destroyCharts();
-  $('#player-dialog').close();
-});
-$('#compare-close').addEventListener('click', () => {
-  destroyCmpCharts();
-  $('#compare-dialog').close();
-});
+$('#player-dialog .dialog-close').addEventListener('click', () => { $('#player-dialog').close(); });
+$('#player-dialog').addEventListener('close', () => { destroyCharts(); });
+$('#compare-close').addEventListener('click', () => { $('#compare-dialog').close(); });
+$('#compare-dialog').addEventListener('close', () => { destroyCmpCharts(); });
 $('#btn-cmp-go').addEventListener('click', () => openCompare());
 $('#btn-cmp-clear').addEventListener('click', () => {
   compare.selected = [];

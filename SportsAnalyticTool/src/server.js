@@ -6,7 +6,14 @@ const { roles, context, requirePermission } = require('./rbac');
 const app = express();
 const port = Number(process.env.PORT || 3000);
 const databasePath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'hca_analytics.sqlite');
-const db = new Database(databasePath, { readonly: true });
+let db;
+try {
+  db = new Database(databasePath, { readonly: true });
+} catch (err) {
+  console.error(`Database unavailable at ${databasePath}: ${err.message}`);
+  console.error('Run "npm run build-database" to create it, or set DATABASE_PATH to an existing file.');
+  process.exit(1);
+}
 const responseCache = new Map();
 const cacheTtlMs = 30000;
 
@@ -92,14 +99,21 @@ app.get('/api/players', requirePermission('read:players'), (req, res) => {
   const search = req.query.search ? 'AND (LOWER(ps.player_name) LIKE @search OR LOWER(ps.team_name) LIKE @search)' : '';
   if (req.query.search) params.search = `%${String(req.query.search).toLowerCase()}%`;
   const rows = queryRows(`
+    WITH failed_comps AS (
+      SELECT DISTINCT CAST(SUBSTR(source_url, INSTR(source_url, '/stats/') + 7,
+        INSTR(SUBSTR(source_url, INSTR(source_url, '/stats/') + 7), '-') - 1) AS INTEGER) competition_id
+      FROM source_feeds WHERE status = 'failed'
+    )
     SELECT TRIM(ps.player_name) player_name, ps.player_id, ps.team_name,
       SUM(ps.matches) matches, SUM(ps.innings) innings, SUM(ps.total_runs) runs,
       SUM(ps.balls_faced) balls, ROUND(100.0 * SUM(ps.total_runs) / NULLIF(SUM(ps.balls_faced), 0), 2) strike_rate,
       SUM(ps.wickets_taken) wickets, SUM(ps.total_legal_balls_bowled) legal_balls,
       ROUND(6.0 * SUM(ps.total_runs_conceded) / NULLIF(SUM(ps.total_legal_balls_bowled), 0), 2) economy,
       CASE WHEN SUM(ps.matches) >= 3 AND SUM(ps.innings) >= 3 AND SUM(ps.total_runs) >= 100 THEN 'High' ELSE 'Limited' END confidence,
+      MAX(CASE WHEN fc.competition_id IS NOT NULL THEN 1 ELSE 0 END) feed_gap,
       COUNT(*) OVER () total_rows
     FROM player_stats ps JOIN tournaments t ON t.competition_id = ps.competition_id JOIN seasons s ON s.season_id = t.season_id
+    LEFT JOIN failed_comps fc ON fc.competition_id = ps.competition_id
     ${where} ${where ? search.replace('AND', 'AND') : search ? `WHERE ${search.slice(4)}` : ''}
     GROUP BY ps.player_id, ps.team_id, ps.team_name
     ORDER BY runs DESC, wickets DESC LIMIT @pageSize OFFSET @offset
@@ -195,6 +209,12 @@ app.get('/api/compare-pool', requirePermission('read:players'), (req, res) => {
     clauses.push('ps.team_name = @team');
     params.team = String(req.query.team);
   }
+  if (req.query.batHand === 'right') clauses.push("LOWER(ps.batting_type) LIKE '%right%'");
+  if (req.query.batHand === 'left') clauses.push("LOWER(ps.batting_type) LIKE '%left%'");
+  if (req.query.bowlType) {
+    clauses.push('TRIM(ps.bowling_type) = @bowlType');
+    params.bowlType = String(req.query.bowlType);
+  }
 
   const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
 
@@ -207,6 +227,13 @@ app.get('/api/compare-pool', requirePermission('read:players'), (req, res) => {
     params.search = `%${String(req.query.search).toLowerCase()}%`;
     hav.push('(LOWER(TRIM(ps.player_name)) LIKE @search OR LOWER(ps.team_name) LIKE @search)');
   }
+  if (req.query.role === 'batter') {
+    hav.push('NOT (SUM(ps.matches_bowled) > 2 AND SUM(ps.wickets_taken) > 0)');
+  } else if (req.query.role === 'bowler') {
+    hav.push('SUM(ps.matches_bowled) > 2 AND SUM(ps.wickets_taken) > 0 AND NOT (SUM(ps.innings) > 3 AND SUM(ps.total_runs) > 50)');
+  } else if (req.query.role === 'allrounder') {
+    hav.push('SUM(ps.matches_bowled) > 2 AND SUM(ps.wickets_taken) > 0 AND SUM(ps.innings) > 3 AND SUM(ps.total_runs) > 50');
+  }
   const having = hav.length ? `HAVING ${hav.join(' AND ')}` : '';
 
   // Tournament filter: bounded to ~1000 per tournament, use 5000.
@@ -218,6 +245,11 @@ app.get('/api/compare-pool', requirePermission('read:players'), (req, res) => {
   params.rowLimit = rowLimit;
 
   const rows = queryRows(`
+    WITH failed_comps AS (
+      SELECT DISTINCT CAST(SUBSTR(source_url, INSTR(source_url, '/stats/') + 7,
+        INSTR(SUBSTR(source_url, INSTR(source_url, '/stats/') + 7), '-') - 1) AS INTEGER) competition_id
+      FROM source_feeds WHERE status = 'failed'
+    )
     SELECT TRIM(ps.player_name) player_name, ps.player_id, ps.team_name,
       MAX(TRIM(ps.batting_type)) batting_type,
       MAX(TRIM(ps.bowling_type)) bowling_type,
@@ -234,10 +266,12 @@ app.get('/api/compare-pool', requirePermission('read:players'), (req, res) => {
       SUM(CAST(json_extract(ps.raw_json, '$.Fifties') AS INTEGER)) fifties,
       SUM(CAST(json_extract(ps.raw_json, '$.Hundreds') AS INTEGER)) hundreds,
       MAX(ps.highest_score) highest_score,
+      MAX(CASE WHEN fc.competition_id IS NOT NULL THEN 1 ELSE 0 END) feed_gap,
       COUNT(*) OVER () total_rows
     FROM player_stats ps
     JOIN tournaments t ON t.competition_id = ps.competition_id
     JOIN seasons s ON s.season_id = t.season_id
+    LEFT JOIN failed_comps fc ON fc.competition_id = ps.competition_id
     ${where}
     GROUP BY ps.player_id, ps.team_name
     ${having}

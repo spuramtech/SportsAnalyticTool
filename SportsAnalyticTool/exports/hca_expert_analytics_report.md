@@ -1,7 +1,7 @@
 # HCA Expert Cricket Analytics Report
 
 ## Scope and Evidence Contract
-- Generated: 2026-09-05T06:34:05.898Z
+- Generated: 2026-09-12T07:43:01.926Z
 - Coverage: HCA tournament, team, player, batting, and bowling feeds for 2024-2026.
 - Latest observed season: 2026
 - This report is descriptive and decision-support oriented. It does not infer injuries, opposition strength, pitch conditions, selection certainty, or causality because those fields are not present in the source data.
@@ -22,8 +22,8 @@
 | negative_runs | 0 | must be 0 |
 | negative_wickets | 0 | must be 0 |
 | missing_player_ids | 0 | investigate before selection |
-| failed_source_feeds | 95 | exclude or disclose |
-| player_stats_rows | 17875 | coverage denominator |
+| failed_source_feeds | 117 | exclude or disclose |
+| player_stats_rows | 19746 | coverage denominator |
 
 ## Batting Leaders With Evidence Threshold
 | Player | Team | Season | Runs | Balls | Calculated SR | Matches | Tournaments | Confidence |
@@ -95,81 +95,81 @@
 | Walkertown | 2026 | 6 | 6 | 0 | 100 | 12 | 1.852 |
 | Swastik Union | 2026 | 6 | 6 | 0 | 100 | 12 | 1.385 |
 | Reliance | 2026 | 6 | 6 | 0 | 100 | 10 | 1.541 |
-| Saint Sai | 2026 | 4 | 4 | 0 | 100 | 8 | 1.274 |
-| Kishore & Sons | 2026 | 2 | 2 | 0 | 100 | 4 | 1.034 |
+| Saint Sai | 2026 | 5 | 5 | 0 | 100 | 10 | 1.376 |
+| Senior Mens - D | 2026 | 2 | 2 | 0 | 100 | 8 | 1.119 |
+| U19 Womens - N | 2026 | 3 | 3 | 0 | 100 | 8 | 1.648 |
+| Kishore & Sons | 2026 | 3 | 3 | 0 | 100 | 6 | 1.023 |
+| U19 Womens - C | 2026 | 3 | 3 | 0 | 100 | 6 | 1.014 |
+| U19 Womens - E | 2026 | 3 | 3 | 0 | 100 | 6 | 1.653 |
+| MU23 Emerging - A | 2026 | 1 | 1 | 0 | 100 | 6 | 1.003 |
+| U19 Womens - W | 2026 | 3 | 3 | 0 | 100 | 6 | 1.172 |
+| Pallavi Model School - Alwal | 2026 | 2 | 2 | 0 | 100 | 4 | 1.538 |
+| Crescent High School - Hafez Baba Nagar | 2026 | 2 | 2 | 0 | 100 | 4 | 2.556 |
+| Gowtham Model School - Chandanagar | 2026 | 2 | 2 | 0 | 100 | 4 | 2.052 |
 | Mahesh | 2026 | 2 | 2 | 0 | 100 | 4 | 1.607 |
-| Senior Mens - E | 2026 | 1 | 1 | 0 | 100 | 3 | 1.622 |
-| Greenlands | 2026 | 1 | 1 | 0 | 100 | 2 | 1.896 |
+| Greenlands | 2026 | 2 | 2 | 0 | 100 | 4 | 2.425 |
+| Secunderabad Club | 2026 | 2 | 2 | 0 | 100 | 4 | 2.403 |
+| MU19 Super League - B | 2026 | 2 | 2 | 0 | 100 | 4 | 1.019 |
+| MU19 Super League - F | 2026 | 2 | 2 | 0 | 100 | 4 | 1.075 |
+| Medjee Junior College - Sec.bad | 2026 | 2 | 2 | 0 | 100 | 4 | 1.457 |
+| U19 Womens - R | 2026 | 3 | 3 | 0 | 100 | 4 | 1.274 |
+| Gowtham Model School - West Marredpally | 2026 | 2 | 2 | 0 | 100 | 2 | 1.638 |
+| St Patricks High School - Secunderabad | 2026 | 1 | 1 | 0 | 100 | 2 | 1.024 |
+| Silver Oaks Interantional School - Bachupally | 2026 | 1 | 1 | 0 | 100 | 2 | 2.032 |
+| The Hyderabad Public School - Begumpet | 2026 | 2 | 2 | 0 | 100 | 2 | 2.043 |
+| Bhavans Sri Aurobindo Junior College - Sainikpuri | 2026 | 2 | 2 | 0 | 100 | 2 | 3.503 |
+| Hidayah Islamic International School - Mehdipatnam | 2026 | 2 | 2 | 0 | 100 | 2 | 3.137 |
+| Shree Swaminarayan Gurukul International School - Moinabad | 2026 | 1 | 1 | 0 | 100 | 2 | 1.292 |
+| Oakridge International School - Gachibowli | 2026 | 2 | 2 | 0 | 100 | 2 | 1.595 |
+| The Gaudium School - Kollur | 2026 | 2 | 2 | 0 | 100 | 2 | 1.804 |
 | Panduranga Pai Memorial | 2026 | 1 | 1 | 0 | 100 | 2 | 1.005 |
-| Secunderabad Club | 2026 | 1 | 1 | 0 | 100 | 2 | 4.556 |
-| Senior Mens - D | 2026 | 1 | 1 | 0 | 100 | 2 | 1.244 |
-| Hyderabad E Champions | 2026 | 10 | 9 | 1 | 90 | 14 | 1.065 |
-| Agarwal Seniors | 2026 | 9 | 8 | 1 | 88.89 | 24 | 1.375 |
-| Sri Chakra | 2026 | 9 | 8 | 1 | 88.89 | 24 | 1.2 |
-| Nizamabad District | 2026 | 14 | 12 | 2 | 85.71 | 28 | 1.584 |
-| Sportive | 2026 | 13 | 11 | 2 | 84.62 | 26 | 1.193 |
-| Young Citizen | 2026 | 6 | 5 | 0 | 83.33 | 11 | 1.661 |
-| Nizam Cricket Club | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.58 |
-| Amberpet | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.422 |
-| Victory | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.186 |
-| Deccan Colts | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.398 |
-| Satya | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.057 |
-| ML Jaisimha | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.408 |
-| Vijay | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.309 |
-| HCA District - 1 | 2026 | 6 | 5 | 1 | 83.33 | 10 | 1.155 |
-| Marredpally Blues | 2026 | 11 | 9 | 2 | 81.82 | 26 | 1.255 |
-| Vijay Hanuman | 2026 | 11 | 9 | 2 | 81.82 | 26 | 1.278 |
-| Jai Hanuman | 2026 | 15 | 12 | 3 | 80 | 26 | 1.002 |
-| Khalsa | 2026 | 13 | 10 | 2 | 76.92 | 23 | 1.113 |
-| Nalgonda District | 2026 | 13 | 10 | 3 | 76.92 | 22 | 1.188 |
-| Ours | 2026 | 12 | 9 | 2 | 75 | 25 | 0.982 |
-| Azad | 2026 | 4 | 3 | 1 | 75 | 6 | 0.837 |
-| Lords | 2026 | 4 | 3 | 1 | 75 | 6 | 1.475 |
-| MU19 Selections - A | 2026 | 4 | 3 | 1 | 75 | 6 | 1.02 |
-| MU19 Selections - I | 2026 | 4 | 3 | 1 | 75 | 6 | 1.069 |
-| MU19 Selections - F | 2026 | 4 | 3 | 1 | 75 | 6 | 1.212 |
-| MU19 Selections - L | 2026 | 4 | 3 | 1 | 75 | 6 | 0.993 |
-| Team Speed | 2026 | 11 | 8 | 1 | 72.73 | 28 | 1.576 |
-| Hyderabad Bottling | 2026 | 11 | 8 | 2 | 72.73 | 27 | 0.955 |
-| Chetan Anand Cricket Academy | 2026 | 10 | 7 | 3 | 70 | 18 | 1.217 |
-| East Marredpally | 2026 | 13 | 9 | 3 | 69.23 | 29 | 0.955 |
-| Sporting XI | 2026 | 13 | 9 | 2 | 69.23 | 24 | 1.384 |
-| Rohit XI | 2026 | 13 | 9 | 3 | 69.23 | 15 | 1.54 |
-| Future Stars | 2026 | 12 | 8 | 3 | 66.67 | 25 | 1.48 |
+| Medak District - 1 | 2026 | 1 | 1 | 0 | 100 | 2 | 26.826 |
+| Warangal District - 1 | 2026 | 1 | 1 | 0 | 100 | 2 | 1.105 |
+| Nalgonda District - 1 | 2026 | 1 | 1 | 0 | 100 | 2 | 1.016 |
+| JRS International School - Narapally | 2026 | 2 | 2 | 0 | 100 | 2 | 3.182 |
+| Indus Universal School - Sainkpuri | 2026 | 2 | 2 | 0 | 100 | 2 | 2.156 |
+| St Andrews School - Keesara | 2026 | 2 | 2 | 0 | 100 | 2 | 1.019 |
+| Pallavi Model School - Bowenpally | 2026 | 1 | 1 | 0 | 100 | 2 | 1.179 |
+| Genesis School - Kukatpally | 2026 | 1 | 1 | 0 | 100 | 2 | 1.006 |
+| IGNITE Junior College - Medchal | 2026 | 1 | 1 | 0 | 100 | 2 | 1.036 |
+| Walkertown School - Padmaro Nagar | 2026 | 1 | 1 | 0 | 100 | 2 | 1.011 |
+| Hyderabad - MU19 | 2026 | 1 | 1 | 0 | 100 | 2 | 1.015 |
+| Cal Public School - Kapra | 2026 | 2 | 2 | 0 | 100 | 0 | 1.012 |
+| Gowtham Model School - Ameerpet | 2026 | 2 | 2 | 0 | 100 | 0 | 1.036 |
 
 ## Multi-Season Player Trend Signals
 | Player | First season | Latest season | Prior runs | Latest runs | Prior wickets | Latest wickets | Seasons observed |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| ABHIRATH REDDY MANDADI | 2024 | 2026 | 1782 | 1401 | 8 | 6 | 3 |
-| Patkuri Nitish Reddy | 2024 | 2026 | 1342 | 1085 | 1 | 3 | 3 |
-| Bhavesh Seth | 2025 | 2026 | 559 | 1067 | 0 | 1 | 2 |
-| P Advith Reddy | 2024 | 2026 | 1271 | 1026 | 4 | 2 | 3 |
-| Sai Vikas Reddy | 2024 | 2026 | 1866 | 996 | 0 | 0 | 3 |
+| ABHIRATH REDDY MANDADI | 2024 | 2026 | 1782 | 1491 | 8 | 7 | 3 |
+| Sai Vikas Reddy | 2024 | 2026 | 1866 | 1362 | 0 | 0 | 3 |
+| Tanmay Agarwal | 2024 | 2026 | 701 | 1180 | 5 | 0 | 3 |
+| Patkuri Nitish Reddy | 2024 | 2026 | 1342 | 1115 | 1 | 3 | 3 |
+| P Advith Reddy | 2024 | 2026 | 1271 | 1114 | 4 | 2 | 3 |
+| Bhavesh Seth | 2025 | 2026 | 559 | 1108 | 0 | 1 | 2 |
+| Shaik Rehaan Roshan | 2024 | 2026 | 1525 | 1009 | 0 | 0 | 3 |
 | Wafi  Kachchhi | 2024 | 2026 | 907 | 985 | 27 | 23 | 3 |
-| Tanmay Agarwal | 2024 | 2026 | 701 | 983 | 5 | 0 | 3 |
-| Kushal Sheerla | 2024 | 2026 | 334 | 954 | 0 | 0 | 3 |
-| ADITYA JAVVAJI | 2024 | 2026 | 1257 | 947 | 0 | 0 | 3 |
-| T Shiva Rama Krishna | 2024 | 2026 | 1323 | 894 | 9 | 6 | 3 |
-| Shaik Rehaan Roshan | 2024 | 2026 | 1525 | 893 | 0 | 0 | 3 |
-| Rahul Radesh | 2024 | 2026 | 698 | 891 | 0 | 0 | 3 |
-| Aravelly Avanish Rao | 2024 | 2026 | 949 | 879 | 1 | 0 | 3 |
-| Khush Agarwal | 2025 | 2026 | 166 | 831 | 26 | 22 | 2 |
-| Mickil Jaiswal | 2024 | 2026 | 1617 | 828 | 46 | 22 | 3 |
-| Hrishikesh Simha | 2024 | 2026 | 1927 | 811 | 19 | 3 | 3 |
+| Jashwanth Mote | 2024 | 2026 | 1081 | 981 | 0 | 2 | 3 |
+| Kushal Sheerla | 2024 | 2026 | 334 | 974 | 0 | 0 | 3 |
+| ADITYA JAVVAJI | 2024 | 2026 | 1257 | 967 | 0 | 0 | 3 |
+| Aravelly Avanish Rao | 2024 | 2026 | 949 | 952 | 1 | 0 | 3 |
+| ANANTH PRATEEK REDDY | 2024 | 2026 | 943 | 938 | 0 | 1 | 3 |
+| Rahul Radesh | 2024 | 2026 | 698 | 922 | 0 | 0 | 3 |
+| T Shiva Rama Krishna | 2024 | 2026 | 1323 | 919 | 9 | 6 | 3 |
+| Mickil Jaiswal | 2024 | 2026 | 1617 | 877 | 46 | 23 | 3 |
+| Hrishikesh Simha | 2024 | 2026 | 1927 | 874 | 19 | 3 | 3 |
+| Khush Agarwal | 2025 | 2026 | 166 | 855 | 26 | 23 | 2 |
+| Aaron George Varghese | 2024 | 2026 | 951 | 840 | 0 | 0 | 3 |
+| Aelgani Varun Goud | 2024 | 2026 | 1010 | 837 | 24 | 30 | 3 |
+| Ravi Teja  T | 2024 | 2026 | 1073 | 835 | 45 | 20 | 3 |
+| Harshit  Choudhary | 2024 | 2026 | 988 | 812 | 33 | 1 | 3 |
 | Anumula Vignesh Reddy | 2024 | 2026 | 961 | 807 | 2 | 0 | 3 |
-| Harshit  Choudhary | 2024 | 2026 | 988 | 790 | 33 | 1 | 3 |
-| Jashwanth Kanneboina | 2024 | 2026 | 1139 | 782 | 15 | 8 | 3 |
-| Jashwanth Mote | 2024 | 2026 | 1081 | 773 | 0 | 0 | 3 |
-| ANANTH PRATEEK REDDY | 2024 | 2026 | 943 | 771 | 0 | 1 | 3 |
-| GANESH GADUGU | 2024 | 2026 | 895 | 730 | 18 | 3 | 3 |
-| Aelgani Varun Goud | 2024 | 2026 | 1010 | 714 | 24 | 29 | 3 |
-| Aaron George Varghese | 2024 | 2026 | 951 | 706 | 0 | 0 | 3 |
-| Himateja Kodimela | 2024 | 2026 | 764 | 701 | 1 | 0 | 3 |
-| Puneeth Sai Medikonda | 2024 | 2026 | 371 | 698 | 18 | 0 | 3 |
-| Chandan Sahani | 2024 | 2026 | 1749 | 697 | 16 | 7 | 3 |
-| Gaurav Reddy | 2024 | 2026 | 1471 | 694 | 1 | 0 | 3 |
-| Anvith Reddy | 2024 | 2026 | 1243 | 685 | 14 | 8 | 3 |
-| Aryan Krishna | 2024 | 2026 | 895 | 682 | 0 | 0 | 3 |
+| GANESH GADUGU | 2024 | 2026 | 895 | 804 | 18 | 3 | 3 |
+| Jashwanth Kanneboina | 2024 | 2026 | 1139 | 794 | 15 | 8 | 3 |
+| Aman Rao Perala | 2024 | 2026 | 641 | 762 | 1 | 0 | 3 |
+| SMYAN BHARADWAJ | 2024 | 2026 | 765 | 753 | 0 | 0 | 3 |
+| Shashank Lokesh | 2024 | 2026 | 1294 | 753 | 0 | 0 | 3 |
+| Aryan Krishna | 2024 | 2026 | 895 | 750 | 0 | 0 | 3 |
+| M Hansin Reddy | 2024 | 2026 | 937 | 745 | 11 | 1 | 3 |
 
 ## Analyst Review And Future Planning Framework
 ### Player review
@@ -283,9 +283,31 @@
 - https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/60-786-playerstats.js: 404 Not Found
 - https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/60-787-playerstats.js: 404 Not Found
 - https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/60-788-playerstats.js: 404 Not Found
-- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/65-679-playerstats.js: 404 Not Found
-- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/65-680-playerstats.js: 404 Not Found
 - https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/65-681-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-169-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-170-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-177-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-211-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-213-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-214-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-230-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-298-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-305-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-808-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-820-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-839-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-843-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-850-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-878-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-880-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-881-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-892-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-894-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-895-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-898-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-899-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-900-playerstats.js: 404 Not Found
+- https://hycamcfeeds.s3.ap-south-1.amazonaws.com/feeds/stats/66-901-playerstats.js: 404 Not Found
 
 ## Reproducibility
 - Database: `hca_analytics.sqlite`
