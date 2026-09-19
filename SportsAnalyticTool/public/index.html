@@ -277,6 +277,10 @@
     .mcmp-chart-box { border: 1px solid var(--line); padding: 14px 16px; background: var(--surface); }
     .mcmp-chart-box canvas { display: block; width: 100%; }
     @media (max-width: 1100px) { .mcmp-layout { grid-template-columns: 1fr; } }
+    /* ── Compare pool table: self-contained scroll box ── */
+    #cpool-table-wrap { max-height: 60vh; overflow: auto; }
+    #cpool-stats-table .thead-sort th { position: sticky; top: 0; z-index: 3; background: var(--paper); }
+    #cpool-stats-table .thead-flt th  { position: sticky; z-index: 3; background: var(--paper); }
   </style>
 </head>
 <body>
@@ -373,7 +377,7 @@
             <div><p class="eyebrow" id="cpool-count">Player pool</p><h3>Select players to compare</h3></div>
             <span class="table-note">Use + to add a player · select 2 – 6 players then Compare</span>
           </div>
-          <div class="table-wrap">
+          <div class="table-wrap" id="cpool-table-wrap">
             <table class="stats-table" id="cpool-stats-table">
               <thead></thead>
               <tbody id="cpool-table"></tbody>

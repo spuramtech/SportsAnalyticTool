@@ -660,6 +660,11 @@ function renderCpoolTable(rows, total = rows.length, capped = false) {
       `<th class="th-flt">${fltInputs[c.key] || ''}</th>`
     ).join('') + '<th class="th-flt"></th>';
     thead.innerHTML = `<tr class="thead-sort">${sortRow}</tr><tr class="thead-flt">${fltRow}</tr>`;
+    const sortRowEl = thead.querySelector('.thead-sort');
+    if (sortRowEl) {
+      const h = sortRowEl.getBoundingClientRect().height;
+      thead.querySelectorAll('.thead-flt th').forEach(th => { th.style.top = h + 'px'; });
+    }
   }
 
   // Render tbody
