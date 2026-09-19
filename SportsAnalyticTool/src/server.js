@@ -7,8 +7,10 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const databasePath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'hca_analytics.sqlite');
 let db;
+let dbWrite;
 try {
   db = new Database(databasePath, { readonly: true });
+  dbWrite = new Database(databasePath);
 } catch (err) {
   console.error(`Database unavailable at ${databasePath}: ${err.message}`);
   console.error('Run "npm run build-database" to create it, or set DATABASE_PATH to an existing file.');
@@ -283,9 +285,76 @@ app.get('/api/compare-pool', requirePermission('read:players'), (req, res) => {
   res.json({ rows, total, capped: total > rowLimit });
 });
 
+// ── PDF Registration endpoints ────────────────────────────────────────────────
+
+app.get('/api/registrations/summary', requirePermission('read:players'), (req, res) => {
+  const total    = db.prepare('SELECT COUNT(*) cnt FROM player_registration').get().cnt;
+  const accepted = db.prepare("SELECT COUNT(*) cnt FROM player_registration WHERE match_status='accepted'").get().cnt;
+  const review   = db.prepare("SELECT COUNT(*) cnt FROM player_registration WHERE match_status='review'").get().cnt;
+  const unmatched= db.prepare("SELECT COUNT(*) cnt FROM player_registration WHERE match_status='unmatched'").get().cnt;
+  const pdfs     = db.prepare('SELECT COUNT(DISTINCT source_pdf) cnt FROM player_registration').get().cnt;
+  const sources  = db.prepare('SELECT DISTINCT source_pdf FROM player_registration ORDER BY source_pdf').all().map(r => r.source_pdf);
+  res.json({ total, accepted, review, unmatched, pdfs, sources });
+});
+
+app.get('/api/registrations', requirePermission('read:players'), (req, res) => {
+  const { pageNumber, pageSize, offset } = page(req.query);
+  const clauses = [];
+  const params  = {};
+
+  if (req.query.status && req.query.status !== 'all') {
+    clauses.push('match_status = @status');
+    params.status = String(req.query.status);
+  }
+  if (req.query.source && req.query.source !== 'all') {
+    clauses.push('source_pdf = @source');
+    params.source = String(req.query.source);
+  }
+  if (req.query.search) {
+    clauses.push('(LOWER(full_name_pdf) LIKE @search OR LOWER(club_pdf) LIKE @search OR LOWER(COALESCE(db_name_match,"")) LIKE @search)');
+    params.search = `%${String(req.query.search).toLowerCase()}%`;
+  }
+
+  const where = clauses.length ? `WHERE ${clauses.join(' AND ')}` : '';
+  params.pageSize = pageSize;
+  params.offset   = offset;
+
+  const rows = db.prepare(`
+    SELECT hca_reg_id, full_name_pdf, club_pdf, date_of_birth,
+           match_tier, match_status, match_score,
+           db_name_match, db_club_match, source_pdf, player_id,
+           COUNT(*) OVER () total_rows
+    FROM player_registration
+    ${where}
+    ORDER BY
+      CASE match_status WHEN 'review' THEN 0 WHEN 'unmatched' THEN 1 ELSE 2 END,
+      full_name_pdf
+    LIMIT @pageSize OFFSET @offset
+  `).all(params);
+
+  const total = rows[0]?.total_rows || 0;
+  res.json({ rows, page: pageNumber, pageSize, total });
+});
+
+app.patch('/api/registrations/:hcaRegId', requirePermission('read:players'), (req, res) => {
+  const { hcaRegId } = req.params;
+  const { status } = req.body;
+  const allowed = ['accepted', 'rejected', 'review', 'pending'];
+  if (!allowed.includes(status)) {
+    return res.status(400).json({ error: `status must be one of: ${allowed.join(', ')}` });
+  }
+  const result = dbWrite.prepare(
+    "UPDATE player_registration SET match_status = ? WHERE hca_reg_id = ?"
+  ).run(status, hcaRegId);
+  if (result.changes === 0) return res.status(404).json({ error: 'Record not found' });
+  res.json({ ok: true, hca_reg_id: hcaRegId, match_status: status });
+});
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 app.use((req, res) => res.sendFile(path.join(publicPath, 'index.html')));
 
 const server = app.listen(port, '0.0.0.0', () => console.log(`HCA Analytics running on http://0.0.0.0:${port}`));
-function shutdown() { server.close(() => { db.close(); process.exit(0); }); }
+function shutdown() { server.close(() => { db.close(); dbWrite.close(); process.exit(0); }); }
 process.on('SIGTERM', shutdown);
 process.on('SIGINT', shutdown);

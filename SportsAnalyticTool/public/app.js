@@ -37,12 +37,13 @@ function query() {
 function showSection(section) {
   $$('.content-section').forEach(item => item.classList.toggle('active-section', item.id === `${section}-section`));
   $$('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.section === section));
-  const titles = { overview: 'Performance overview', players: 'Player pool', teams: 'Team performance', quality: 'Data quality', compare: 'Compare players' };
+  const titles = { overview: 'Performance overview', players: 'Player pool', teams: 'Team performance', quality: 'Data quality', compare: 'Compare players', registrations: 'PDF Registrations' };
   $('#page-title').textContent = titles[section] || section;
   if (section === 'players' && !state.loaded.has('players')) loadPlayers();
   if (section === 'teams' && !state.loaded.has('teams')) loadTeams();
   if (section === 'quality' && !state.loaded.has('quality')) loadQuality();
   if (section === 'compare' && !cpoolState.opts) initComparePool();
+  if (section === 'registrations' && !state.loaded.has('registrations')) initRegistrations();
 }
 
 function renderKpis(summary) {
@@ -1436,6 +1437,148 @@ document.getElementById('cpool-stats-table').addEventListener('input', e => {
   const val = inp.value.trim();
   val === '' ? delete cpoolState.colFilters[inp.dataset.fcol] : (cpoolState.colFilters[inp.dataset.fcol] = val);
   renderCpoolTable(cpoolState.pool);
+});
+
+// ── Registrations module ──────────────────────────────────────────────────────
+
+const regState = { page: 1, pageSize: 50, total: 0, status: 'all', source: 'all', search: '' };
+
+async function apiPatch(endpoint, body) {
+  const res = await fetch(endpoint, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json', 'X-Dev-Role': state.role },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error(`PATCH failed: ${res.status}`);
+  return res.json();
+}
+
+async function initRegistrations() {
+  state.loaded.add('registrations');
+  const summary = await api('/api/registrations/summary');
+  renderRegKpis(summary);
+
+  const sourceFilter = $('#reg-source-filter');
+  summary.sources.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s; opt.textContent = s;
+    sourceFilter.appendChild(opt);
+  });
+
+  await loadRegPage();
+}
+
+function renderRegKpis(s) {
+  const cards = [
+    ['total',     'Total loaded',   'Registration records in DB', ''],
+    ['accepted',  'Accepted',       'Exact or confirmed match',   'color:#1a5c1a'],
+    ['review',    'Needs review',   'Fuzzy match, human check',   'color:#7a3a00'],
+    ['unmatched', 'Unmatched',      'Not found in analytics DB',  'color:#888'],
+    ['pdfs',      'PDFs loaded',    'Distinct source files',      ''],
+  ];
+  $('#reg-kpis').innerHTML = cards.map(([k, lbl, foot, style]) =>
+    `<div class="kpi"><div class="kpi-label">${lbl}</div><div class="kpi-value" style="${style}">${number(s[k])}</div><div class="kpi-foot">${foot}</div></div>`
+  ).join('');
+}
+
+async function loadRegPage() {
+  const params = new URLSearchParams({
+    page: regState.page, pageSize: regState.pageSize,
+    status: regState.status, source: regState.source,
+  });
+  if (regState.search) params.set('search', regState.search);
+
+  const data = await loadWithStatus('Loading registrations…', () => api(`/api/registrations?${params}`));
+  regState.total = data.total;
+  renderRegTable(data.rows);
+  renderRegPager();
+  $('#reg-count-note').textContent = `${data.total.toLocaleString()} records`;
+}
+
+function tierBadge(t) {
+  if (t === 1) return '<span class="reg-tier t1">1</span>';
+  if (t === 2) return '<span class="reg-tier t2">2</span>';
+  if (t === 3) return '<span class="reg-tier t3">3</span>';
+  return '<span class="reg-tier tn">—</span>';
+}
+
+function statusBadge(s) {
+  return `<span class="reg-status ${s}">${s}</span>`;
+}
+
+function actionsCell(row) {
+  if (row.match_status === 'review') {
+    return `<div class="reg-act">
+      <button class="reg-btn accept" data-id="${row.hca_reg_id}" data-action="accepted">Accept</button>
+      <button class="reg-btn reject" data-id="${row.hca_reg_id}" data-action="rejected">Reject</button>
+    </div>`;
+  }
+  if (row.match_status === 'accepted') {
+    return `<div class="reg-act"><button class="reg-btn reject" data-id="${row.hca_reg_id}" data-action="rejected">Reject</button></div>`;
+  }
+  if (row.match_status === 'rejected') {
+    return `<div class="reg-act"><button class="reg-btn accept" data-id="${row.hca_reg_id}" data-action="accepted">Accept</button></div>`;
+  }
+  return '—';
+}
+
+function renderRegTable(rows) {
+  const tbody = $('#reg-table-body');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:28px;color:var(--muted)">No records match the current filters.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(r => `<tr>
+    <td><span style="font:11px var(--mono);color:var(--muted)">${r.hca_reg_id}</span></td>
+    <td><strong>${r.full_name_pdf}</strong></td>
+    <td>${r.club_pdf}</td>
+    <td>${r.date_of_birth || '—'}</td>
+    <td style="text-align:center">${tierBadge(r.match_tier)}</td>
+    <td>${r.db_name_match || '<span style="color:var(--muted)">—</span>'}</td>
+    <td>${r.db_club_match || '<span style="color:var(--muted)">—</span>'}</td>
+    <td style="font:11px var(--mono);text-align:right">${r.match_score != null ? (r.match_score * 100).toFixed(0) + '%' : '—'}</td>
+    <td>${statusBadge(r.match_status)}</td>
+    <td>${actionsCell(r)}</td>
+  </tr>`).join('');
+}
+
+function renderRegPager() {
+  const totalPages = Math.ceil(regState.total / regState.pageSize) || 1;
+  $('#reg-pager-info').textContent = `Page ${regState.page} of ${totalPages} (${regState.total.toLocaleString()} total)`;
+  $('#reg-prev').disabled = regState.page <= 1;
+  $('#reg-next').disabled = regState.page >= totalPages;
+}
+
+$('#reg-apply').addEventListener('click', () => {
+  regState.page   = 1;
+  regState.status = $('#reg-status-filter').value;
+  regState.source = $('#reg-source-filter').value;
+  regState.search = $('#reg-search').value.trim();
+  loadRegPage();
+});
+
+$('#reg-search').addEventListener('keydown', e => { if (e.key === 'Enter') $('#reg-apply').click(); });
+
+$('#reg-prev').addEventListener('click', () => { if (regState.page > 1) { regState.page--; loadRegPage(); } });
+$('#reg-next').addEventListener('click', () => {
+  if (regState.page < Math.ceil(regState.total / regState.pageSize)) { regState.page++; loadRegPage(); }
+});
+
+$('#reg-table-body').addEventListener('click', async e => {
+  const btn = e.target.closest('.reg-btn');
+  if (!btn) return;
+  const { id, action } = btn.dataset;
+  btn.disabled = true;
+  try {
+    await apiPatch(`/api/registrations/${encodeURIComponent(id)}`, { status: action });
+    // Refresh summary KPIs and current page
+    const summary = await api('/api/registrations/summary');
+    renderRegKpis(summary);
+    await loadRegPage();
+  } catch (err) {
+    btn.disabled = false;
+    alert(`Failed to update: ${err.message}`);
+  }
 });
 
 init().catch(error => { document.body.innerHTML = `<main style="padding:40px;font-family:system-ui"><h1>Analytics unavailable</h1><p>${error.message}</p></main>`; });
